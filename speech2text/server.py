@@ -49,7 +49,7 @@ def upload_file():
 
 
 def background_worker():
-    for path in job_queue:
+    for path, mail in job_queue:
         text = speech_to_text(path)
         print(compreno.process(text))
 
