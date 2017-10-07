@@ -88,6 +88,4 @@ if __name__ == '__main__':
        предложения по кредитной карте 
     Скажите пожалуйста как я могу к вам обращаться
     """
-    s = g.spawn(process, txt)
-    s.join()
-    print(s.value)
+    print(process(txt))

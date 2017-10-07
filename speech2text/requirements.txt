@@ -5,3 +5,4 @@ gevent
 requests
 pymorphy2
 pymorphy2-dicts-ru
+markdown2
