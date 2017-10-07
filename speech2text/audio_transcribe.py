@@ -24,6 +24,7 @@ def speech_to_text(audio_path):
     try:
         text = recognizer.recognize_google_cloud(audio_data, credentials_json=GOOGLE_CLOUD_SPEECH_CREDENTIALS,
                                        language="ru-RU")
+        recognizer.recjj
     except sr.UnknownValueError:
         print("Google Cloud Speech could not understand audio")
         raise

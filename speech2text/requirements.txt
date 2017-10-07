@@ -3,3 +3,5 @@ SpeechRecognition
 uuid
 gevent
 requests
+pymorphy2
+pymorphy2-dicts-ru
