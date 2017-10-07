@@ -51,8 +51,7 @@ def upload_file():
 def background_worker():
     for path, mail in job_queue:
         phrases = speech_to_text_long(path)
-        for phrase in phrases:
-            print(compreno.process(phrase))
+        print(compreno.process(" ".join(phrases)))
 
 
 if __name__ == "__main__":
