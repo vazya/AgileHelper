@@ -6,3 +6,6 @@ requests
 pymorphy2
 pymorphy2-dicts-ru
 markdown2
+resampy
+soundfile
+google-api-python-client

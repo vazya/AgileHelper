@@ -62,3 +62,5 @@ if __name__ == "__main__":
     http_server = WSGIServer((args.address, args.port), app)
     g.spawn(background_worker)
     http_server.serve_forever()
+    app.debug = True
+    app.run()
