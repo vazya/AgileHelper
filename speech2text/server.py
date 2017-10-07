@@ -1,7 +1,7 @@
 import os
 from flask import Flask, request, redirect, flash, jsonify
 from werkzeug.utils import secure_filename
-from audio_transcribe import speech_to_text
+from audio_transcribe import speech_to_text_long
 import argparse
 import compreno
 
@@ -50,8 +50,9 @@ def upload_file():
 
 def background_worker():
     for path, mail in job_queue:
-        text = speech_to_text(path)
-        print(compreno.process(text))
+        phrases = speech_to_text_long(path)
+        for phrase in phrases:
+            print(compreno.process(phrase))
 
 
 if __name__ == "__main__":
