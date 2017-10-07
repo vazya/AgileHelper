@@ -1,2 +1,5 @@
 flask
 SpeechRecognition
+uuid
+gevent
+requests

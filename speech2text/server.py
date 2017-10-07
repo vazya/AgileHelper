@@ -1,20 +1,23 @@
 import os
-import threading
-
 from flask import Flask, request, redirect, flash, jsonify
 from werkzeug.utils import secure_filename
 from audio_transcribe import speech_to_text
+import argparse
+import compreno
 
-UPLOAD_FOLDER = '/home/vlad/abby_hack/AgileHelper/speech2text/data'
+import uuid
+
+import gevent as g
+from gevent.queue import Queue
+from gevent.wsgi import WSGIServer
+from gevent import monkey; monkey.patch_all()
+
+UPLOAD_FOLDER = './data'
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-
-def long_running_task(audio_file_path):
-    text = speech_to_text(audio_file_path)
-    return text
+job_queue = Queue()
 
 
 @app.route('/', methods=['POST', 'GET'])
@@ -29,13 +32,11 @@ def upload_file():
             flash('No selected file')
             return redirect(request.url)
         if file:
-            filename = secure_filename(file.filename)
+            filename = str(uuid.uuid4()) + secure_filename(file.filename)
             saved_file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(saved_file_path)
-            task = threading.Thread(target=long_running_task, args=(saved_file_path, ))
-            task.start()
+            job_queue.put(saved_file_path)
             return jsonify({"success": True})
-
     return '''
     <!doctype html>
     <title>Upload new File</title>
@@ -47,6 +48,17 @@ def upload_file():
     '''
 
 
+def background_worker():
+    for path in job_queue:
+        text = speech_to_text(path)
+        print(compreno.process(text))
+
+
 if __name__ == "__main__":
-    app.debug = True
-    app.run()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--port", type=int, help="port to listen", required=True)
+    parser.add_argument("--address", type=str, default='', help="address to listen")
+    args = parser.parse_args()
+    http_server = WSGIServer((args.address, args.port), app)
+    g.spawn(background_worker)
+    http_server.serve_forever()
