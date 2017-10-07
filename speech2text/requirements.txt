@@ -9,3 +9,4 @@ markdown2
 resampy
 soundfile
 google-api-python-client
+webrtcvad
