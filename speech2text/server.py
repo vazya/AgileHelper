@@ -1,7 +1,7 @@
 import os
 from flask import Flask, request, redirect, flash, jsonify
 from werkzeug.utils import secure_filename
-from audio_transcribe import speech_to_text
+from audio_transcribe import speech_to_text_long
 import argparse
 import compreno
 
@@ -11,6 +11,8 @@ import gevent as g
 from gevent.queue import Queue
 from gevent.wsgi import WSGIServer
 from gevent import monkey; monkey.patch_all()
+
+import report
 
 UPLOAD_FOLDER = './data'
 
@@ -35,7 +37,7 @@ def upload_file():
             filename = str(uuid.uuid4()) + secure_filename(file.filename)
             saved_file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(saved_file_path)
-            job_queue.put(saved_file_path)
+            job_queue.put((saved_file_path, request.args.get('mail', 'muxajlbl4.08@mail.ru')))
             return jsonify({"success": True})
     return '''
     <!doctype html>
@@ -50,15 +52,19 @@ def upload_file():
 
 def background_worker():
     for path, mail in job_queue:
-        text = speech_to_text(path)
-        print(compreno.process(text))
-
+        phrases = speech_to_text_long(path)
+        processed = compreno.process(" ".join(phrases))
+        html, markdown = report.report(processed)
+        report.send(markdown, html, mail)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, help="port to listen", required=True)
     parser.add_argument("--address", type=str, default='', help="address to listen")
     args = parser.parse_args()
+    g.spawn(report.init).join()
     http_server = WSGIServer((args.address, args.port), app)
     g.spawn(background_worker)
     http_server.serve_forever()
+    app.debug = True
+    app.run()
