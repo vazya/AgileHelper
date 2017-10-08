@@ -43,9 +43,9 @@ def report(desc):
 
 def send(markdown, html, mail):
     message = MIMEMultipart()
-    message.attach(MIMEText(html, 'html'))
-    message.attach(MIMEApplication(markdown, 'octet-stream',
-                                   Name='report-' + time.strftime("%d_%m_%Y") + '.md'))
+    message.attach(MIMEText(html.encode('utf-8'), 'html', 'utf-8'))
+    message.attach(MIMEApplication(markdown.encode('utf-8'), 'octet-stream',
+                                   Name='report-' + time.strftime("%d_%m_%Y") + '.md', , 'utf-8'))
     message['From'] = user
     message['To'] = mail
     message['Subject'] = 'Ретроспектива'
