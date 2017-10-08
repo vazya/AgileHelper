@@ -37,7 +37,7 @@ def upload_file():
             filename = str(uuid.uuid4()) + secure_filename(file.filename)
             saved_file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(saved_file_path)
-            job_queue.put((saved_file_path, request.args.get('mail', 'muxajlbl4.08@mail.ru')))
+            job_queue.put((saved_file_path, request.args.get('mail', 'ZeroMistakesInc@mail.ru')))
             return jsonify({"success": True})
     return '''
     <!doctype html>
