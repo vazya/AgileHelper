@@ -12,6 +12,8 @@ from gevent.queue import Queue
 from gevent.wsgi import WSGIServer
 from gevent import monkey; monkey.patch_all()
 
+import report
+
 UPLOAD_FOLDER = './data'
 
 app = Flask(__name__)
@@ -51,14 +53,16 @@ def upload_file():
 def background_worker():
     for path, mail in job_queue:
         phrases = speech_to_text_long(path)
-        print(compreno.process(" ".join(phrases)))
-
+        processed = compreno.process(" ".join(phrases))
+        html, markdown = report.report(processed)
+        report.send(markdown, html, mail)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, help="port to listen", required=True)
     parser.add_argument("--address", type=str, default='', help="address to listen")
     args = parser.parse_args()
+    g.spawn(report.init).join()
     http_server = WSGIServer((args.address, args.port), app)
     g.spawn(background_worker)
     http_server.serve_forever()
